@@ -2,7 +2,7 @@ plugins { id 'com.android.application' }
 
 android { namespace 'com.rddmwmddr.adcleaner'; compileSdk 34
     buildFeatures { aidl true }
-    defaultConfig { applicationId 'com.rddmwmddr.adcleaner'; minSdk 24; targetSdk 34; versionCode 1; versionName '1.0' }
+    defaultConfig { applicationId 'com.rddmwmddr.adcleaner'; minSdk 24; targetSdk 34; versionCode 1; versionName '1.0.0' }
 }
 
 dependencies {
