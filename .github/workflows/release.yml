@@ -1,0 +1,60 @@
+name: Build and publish Android release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build and publish
+        required: true
+        default: 1.0.0
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Select source ref
+        id: source
+        run: echo "ref=${{ github.event.inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.source.outputs.ref }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK packages
+        run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.2'
+
+      - name: Build APKs
+        run: gradle --no-daemon :app:assembleDebug :app:assembleRelease
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release-files
+          cp app/build/outputs/apk/debug/app-debug.apk release-files/AdCleanerShizuku-${{ steps.source.outputs.ref }}-debug.apk
+          cp app/build/outputs/apk/release/app-release-unsigned.apk release-files/AdCleanerShizuku-${{ steps.source.outputs.ref }}-release-unsigned.apk
+          sha256sum release-files/*.apk > release-files/AdCleanerShizuku-${{ steps.source.outputs.ref }}-SHA256SUMS
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.source.outputs.ref }}" release-files/* \
+            --repo "${{ github.repository }}" \
+            --title "${{ steps.source.outputs.ref }}" \
+            --notes "首个移动端版本，基于 android-ad-cleaner 的 Shizuku 二次开发。\n\n已验证：Shizuku 授权、组件扫描与挂起、营销通知渠道扫描及跳转关闭入口。测试设备：Redmi K100 Pro Max，澎湃 OS 4.0.4。" \
+            || gh release upload "${{ steps.source.outputs.ref }}" release-files/* --repo "${{ github.repository }}" --clobber
