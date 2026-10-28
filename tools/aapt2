@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /usr/bin/qemu-x86_64-static -L /usr/x86_64-linux-gnu -E LD_LIBRARY_PATH=/usr/x86_64-linux-gnu/lib /usr/lib/android-sdk/build-tools/34.0.0/aapt2 "$@"

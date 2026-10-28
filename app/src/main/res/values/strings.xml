@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Ad Cleaner Mobile</string>
+    <string name="accessibility_description">仅在你选择具体营销通知渠道并确认后，识别该渠道设置页并切换其通知开关。不会关闭整个应用的通知。</string>
+</resources>
